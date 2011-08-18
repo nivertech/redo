@@ -157,7 +157,7 @@ init([Opts]) ->
 %%--------------------------------------------------------------------
 handle_call(close, _From, State) ->
     ok = gen_tcp:close(State#state.sock),
-    {stop, normal, State};
+    {stop, normal};
     
 handle_call({cmd, Packets}, {From, _Ref}, #state{subscriber=undefined, queue=Queue}=State) ->
     case test_connection(State) of
