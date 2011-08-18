@@ -27,7 +27,8 @@
 -export([init/1, handle_call/3, handle_cast/2,
          handle_info/2, terminate/2, code_change/3]).
 
--export([start_link/0, start_link/1, start_link/2, 
+-export([start/0, start/1, start/2, 
+         start_link/0, start_link/1, start_link/2, 
          close/1, cmd/1, cmd/2, cmd/3, subscribe/1, subscribe/2]).
 
 -record(state, {host, port, pass, db, sock, queue, subscriber, cancelled, acc, buffer}).
@@ -51,6 +52,24 @@ start_link(undefined, Opts) when is_list(Opts) ->
 
 start_link(Name, Opts) when is_atom(Name), is_list(Opts) ->
     gen_server:start_link({local, Name}, ?MODULE, [Opts], []).
+
+-spec start() -> {ok, pid()} | {error, term()}.
+start() ->
+    start([]).
+
+-spec start(atom()) -> {ok, pid()} | {error, term()}.
+start(Name) when is_atom(Name) ->
+    start(Name, []);
+
+start(Opts) when is_list(Opts) ->
+    start(?MODULE, Opts).
+
+-spec start(atom(), list()) -> {ok, pid()} | {error, term()}.
+start(undefined, Opts) when is_list(Opts) ->
+    gen_server:start(?MODULE, [Opts], []);
+
+start(Name, Opts) when is_atom(Name), is_list(Opts) ->
+    gen_server:start({local, Name}, ?MODULE, [Opts], []).
 
 -spec close(NameOrPid::atom()|pid()) -> ok.
 close(NameOrPid) ->
