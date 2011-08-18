@@ -28,7 +28,7 @@
          handle_info/2, terminate/2, code_change/3]).
 
 -export([start_link/0, start_link/1, start_link/2, 
-         cmd/1, cmd/2, cmd/3, subscribe/1, subscribe/2]).
+         close/1, cmd/1, cmd/2, cmd/3, subscribe/1, subscribe/2]).
 
 -record(state, {host, port, pass, db, sock, queue, subscriber, cancelled, acc, buffer}).
 
@@ -51,6 +51,10 @@ start_link(undefined, Opts) when is_list(Opts) ->
 
 start_link(Name, Opts) when is_atom(Name), is_list(Opts) ->
     gen_server:start_link({local, Name}, ?MODULE, [Opts], []).
+
+-spec close(NameOrPid::atom()|pid()) -> ok.
+close(NameOrPid) ->
+    gen_server:call(NameOrPid, close).
 
 -spec cmd(list() | binary()) -> list() | binary() | integer().
 cmd(Cmd) ->
@@ -132,6 +136,10 @@ init([Opts]) ->
 %%    {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
+handle_call(close, _From, State) ->
+    ok = gen_tcp:close(State#state.sock),
+    {stop, normal, State};
+    
 handle_call({cmd, Packets}, {From, _Ref}, #state{subscriber=undefined, queue=Queue}=State) ->
     case test_connection(State) of
         State1 when is_record(State1, state) ->
