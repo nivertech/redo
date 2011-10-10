@@ -143,7 +143,7 @@ init([Opts]) ->
         State1 when is_record(State1, state) ->
             {ok, State1};
         Err ->
-            {stop, Err, State}
+            {stop, Err}
     end.
 
 %%--------------------------------------------------------------------
